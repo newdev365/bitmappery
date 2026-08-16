@@ -1,19 +1,24 @@
-# --- Etapa 1: Compilación de la aplicación ---
-DESDE el nodo: Constructor AS 24-alpino
+# --- Etapa 1: Compilación ---
+FROM node:24-alpine AS builder
 
-WORKDIR/usr/src/app
+WORKDIR /usr/src/app
 
-COPIAR paquete.json yarn.lock* ./
-Instalación de hilo EJECUTAR --ignore-scripts
+# Copiar archivos de dependencias
+COPY package.json yarn.lock* ./
 
-COPIAR . .
-RUN construcción de hilo
+# Instalar dependencias para la build
+RUN yarn install --ignore-scripts
 
-# --- Etapa 2: Imagen ligera de producción ---
-DESDE nginx:alpine AS producción
+# Copiar el código y compilar la app
+COPY . .
+RUN yarn build
 
-COPIAR --dede=builder/usr/src/app/dist/usr/share/nginx/html
+# --- Etapa 2: Servidor web de producción ---
+FROM nginx:alpine AS production
 
-EXPONENTE 5173
+# Copiar solo la carpeta de salida generada por la build
+COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 
-CMD ["nginx", "-g", "demonio apagado";]
+EXPOSE 5173
+
+CMD ["nginx", "-g", "daemon off;"]
