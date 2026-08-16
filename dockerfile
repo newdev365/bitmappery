@@ -1,23 +1,19 @@
-# Written by Ange Cesari
-# Use official Node.js based on Alpine
-FROM node:24-alpine
+# --- Etapa 1: Compilación de la aplicación ---
+DESDE el nodo: Constructor AS 24-alpino
 
-# Create dir for application
-WORKDIR /usr/src/app
+WORKDIR/usr/src/app
 
-# Copy package.json
-COPY --chown=node:node package.json ./
+COPIAR paquete.json yarn.lock* ./
+Instalación de hilo EJECUTAR --ignore-scripts
 
-# Install dependencies
-RUN yarn install --ignore-scripts
+COPIAR . .
+RUN construcción de hilo
 
-# Copy the rest of the application code
-COPY --chown=node:node . .
+# --- Etapa 2: Imagen ligera de producción ---
+DESDE nginx:alpine AS producción
 
-USER node
+COPIAR --dede=builder/usr/src/app/dist/usr/share/nginx/html
 
-# Expose the port the application will run on
-EXPOSE 5173
+EXPONENTE 5173
 
-# Run the application
-CMD ["yarn", "dev", "--host", "0.0.0.0"]
+CMD ["nginx", "-g", "demonio apagado";]
