@@ -1,23 +1,34 @@
-# --- Etapa 1: Compilación ---
+# --- Etapa 1: Compilación de la app ---
 FROM node:24-alpine AS builder
 
 WORKDIR /usr/src/app
 
-# Copiar archivos de dependencias
 COPY package.json yarn.lock* ./
-
-# Instalar dependencias para la build
 RUN yarn install --ignore-scripts
 
-# Copiar el código y compilar la app
 COPY . .
 RUN yarn build
 
-# --- Etapa 2: Servidor web de producción ---
+# --- Etapa 2: Imagen ligera de producción en puerto 5173 ---
 FROM nginx:alpine AS production
 
-# Copiar solo la carpeta de salida generada por la build
+# Copiar los archivos estáticos compilados
 COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
+
+# Escribir una configuración limpia de NGINX en el puerto 5173 con soporte SPA
+RUN cat <<'EOF' > /etc/nginx/conf.d/default.conf
+server {
+    listen 5173;
+    listen [::]:5173;
+    server_name localhost;
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+}
+EOF
 
 EXPOSE 5173
 
